@@ -152,15 +152,25 @@ async function executeCommand(source, playerName, rawMessage) {
   }
 
   // ---- setspawn (запомнить точку возврата) ----
-  if (cmd === 'setspawn') {
-    const p = require('./spawnpoint').setCurrent();
-    if (!p) {
-      sendReply(source, 'Бот не на месте');
-      return;
+  if (cmd === 'sethome' || cmd === 'setspawn') {
+    const p = require('./spawnpoint');
+    try {
+      const ok = await p.setHome();
+      if (ok) {
+        const sp = p.get();
+        if (sp && sp.set) {
+          sendReply(source,
+            `Дом установлен (${sp.pos.x}, ${sp.pos.y}, ${sp.pos.z})`
+          );
+        } else {
+          sendReply(source, 'Дом установлен');
+        }
+      } else {
+        sendReply(source, 'Не удалось установить дом');
+      }
+    } catch (e) {
+      sendReply(source, `Ошибка установки дома: ${e.message || e}`);
     }
-    sendReply(source,
-      `Спавн-точка установлена (${p.x.toFixed(0)}, ${p.y.toFixed(0)}, ${p.z.toFixed(0)})`
-    );
     return;
   }
 
@@ -168,11 +178,11 @@ async function executeCommand(source, playerName, rawMessage) {
   if (cmd === 'gohome') {
     const sp = require('./spawnpoint');
     if (!sp.get().set) {
-      sendReply(source, 'Спавн-точка не установлена');
+      sendReply(source, 'Дом не задан');
       return;
     }
     const ok = sp.goTo();
-    sendReply(source, ok ? 'Иду к спавн-точке' : 'Не удалось поставить цель');
+    sendReply(source, ok ? 'Иду к дому' : 'Не удалось поставить цель');
     return;
   }
 
@@ -188,14 +198,23 @@ async function executeCommand(source, playerName, rawMessage) {
   // ---- survival [on|off] ----
   if (cmd === 'survival') {
     const s = require('./survival');
-    if (arg === 'off') {
+    const st = s.getStatus();
+    if (arg === 'toggle') {
+      if (st.enabled) {
+        s.disable();
+        sendReply(source, 'Survival: OFF');
+      } else {
+        s.enable();
+        sendReply(source, 'Survival: ON');
+      }
+    } else if (arg === 'off') {
       s.disable();
-      sendReply(source, 'Survival выключен');
+      sendReply(source, 'Survival: OFF');
     } else if (arg === 'on') {
       s.enable();
-      sendReply(source, 'Survival включён');
+      sendReply(source, 'Survival: ON');
     } else {
-      sendReply(source, `Survival: ${s.getStatus().enabled ? 'ON' : 'OFF'}`);
+      sendReply(source, `Survival: ${st.enabled ? 'ON' : 'OFF'}`);
     }
     return;
   }
@@ -251,10 +270,10 @@ async function executeCommand(source, playerName, rawMessage) {
       '  potions — отчёт по зельям в инвентаре',
       '  clearpotions — очистить чёрный список зелий',
       '  stats — счётчики расходов (зелья/яблоки/еда)',
-      '  survival [on|off] — управление выживанием',
+      '  survival [on|off|toggle] — управление выживанием',
       '  ranged — статус дальнего боя',
-      '  setspawn — установить спавн-точку',
-      '  gohome — идти к спавн-точке',
+      '  sethome / setspawn — установить дом (через кровать или координаты)',
+      '  gohome — идти к дому',
       '  help — список команд',
       '  quit — выйти'
     ].join('\n');

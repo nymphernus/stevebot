@@ -258,18 +258,13 @@
           <button onclick="sendCommand('unguard')">Снять охрану</button>
           <button onclick="sendCommand('stop')">Стоп</button>
           <button onclick="sendCommand('attack')">Атака</button>
-          <button onclick="sendCommand('peace')">Мир</button>
           <button onclick="sendCommand('status')">Статус</button>
         </div>
         <div class="controls-grid">
-          <button onclick="sendCommand('setspawn')">Точка спавна</button>
+          <button onclick="sendCommand('sethome')">Установить дом</button>
           <button onclick="sendCommand('gohome')">Домой</button>
-          <button onclick="sendCommand('ranged')">Лук</button>
-          <button onclick="sendCommand('survival')">Выживание</button>
-          <button onclick="sendCommand('survival off')">Выживание: выкл</button>
-          <button onclick="sendCommand('survival on')">Выживание: вкл</button>
+          <button onclick="sendCommand('survival toggle')">Выживание</button>
           <button onclick="sendCommand('clearpotions')">Очистить зелья</button>
-          <button onclick="sendCommand('dumpitems')">Список лута</button>
         </div>
         <div class="input-group">
           <input type="text" id="commandInput" placeholder="Введите команду..." onkeypress="handleKeyPress(event)">
