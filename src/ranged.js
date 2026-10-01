@@ -22,8 +22,6 @@ let charging = false;
 let shooting = false;
 // ДИАГНОСТИКА: имя цели для лога выстрела
 let lastTargetName = 'null';
-// ДИАГНОСТИКА: время последнего лога attackedTarget
-let lastAttackEventAt = 0;
 let lastShotLog = 0;
 const SHOT_LOG_INTERVAL = 1000;
 let noBowWarned = false;
@@ -136,8 +134,6 @@ async function equipMelee() {
 function releaseCharge() {
   if (!charging) return;
   charging = false;
-  // ДИАГНОСТИКА: временный лог, снимается после разбора
-  logger.info(`[🏹 DBG] ВЫСТРЕЛ chargeTicks=${chargeTicks} target=${lastTargetName}`);
   chargeTicks = 0;
   shooting = false;
   lastTargetName = 'null';
@@ -178,18 +174,15 @@ function installPvpGuard() {
     }
 
     const canShoot = !!findBow() && countArrows() > 0;
-    // ДИАГНОСТИКА: временный лог, снимается после разбора
     const heldName = bot.heldItem?.name || 'none';
     const weapon = findMelee();
 
     if (dist != null && dist >= MIN_RANGE && canShoot) {
-      logger.info(`[🏹 DBG] pvp.attack → ranged (dist=${dist.toFixed(1)}, hasBow=${!!findBow()}, hasArrows=${countArrows()}, held=${heldName})`);
       // Дальний бой: цель ведёт pvp, удары мечом не наносятся
       return originalAttack(entity);
     }
 
     // Ближний бой: оружие в руку ДО удара
-    logger.info(`[🏹 DBG] pvp.attack → melee (dist=${dist == null ? 'n/a' : dist.toFixed(1)}, weapon=${weapon?.name || 'none'}, held=${heldName}, canShoot=${canShoot})`);
 
     // Нет оружия вообще — бить нечем, погоня бесполезна
     if (!weapon) {
@@ -217,15 +210,6 @@ function installPvpGuard() {
     return originalAttack(entity);
   };
 
-  // ДИАГНОСТИКА: mineflayer-pvp эмитит это событие сразу после bot.attack().
-  // Значит событие есть — удар отправлен; нет — пакет не ушёл.
-  bot.on('attackedTarget', () => {
-    if (now() - lastAttackEventAt < 1000) return;
-    lastAttackEventAt = now();
-    const t = bot?.pvp?.target;
-    const d = t && bot.entity ? bot.entity.position.distanceTo(t.position).toFixed(1) : 'n/a';
-    logger.info(`[⚔ DBG] attackedTarget: dist=${d} held=${bot?.heldItem?.name || 'empty'}`);
-  });
 }
 
 /**
@@ -255,22 +239,6 @@ function enforceMeleeWeapon() {
  */
 async function onTick() {
   if (!bot || !bot.entity) return;
-
-  // ДИАГНОСТИКА: снимок состояния раз в 500 мс. Снимается после разбора бага.
-  if (!global._rangedDbgLast || Date.now() - global._rangedDbgLast > 500) {
-    global._rangedDbgLast = Date.now();
-    const tgt = bot.pvp?.target;
-    const dist = tgt ? bot.entity.position.distanceTo(tgt.position).toFixed(1) : 'n/a';
-    const bowCount = items().filter((i) => i.name.endsWith('_bow') || i.name === 'bow').length;
-    const arrowCount = countArrows();
-    logger.info(
-      `[🏹 DBG] dist=${dist} bow=${bowCount} arrows=${arrowCount} shooting=${shooting} ` +
-      `charging=${charging} chargeTicks=${chargeTicks} held=${bot.heldItem?.name || 'empty'} ` +
-      `pvpTarget=${tgt?.name || 'null'} tgtHP=${tgt ? (tgt.health != null ? tgt.health.toFixed(1) : 'n/a') : 'n/a'} ` +
-      `botHP=${bot.health != null ? bot.health.toFixed(1) : 'n/a'} canSee=${tgt ? canSee(tgt) : 'n/a'} ` +
-      `pvpInRange=${bot.pvp?.wasInRange} pvpNext=${bot.pvp?.timeToNextAttack} pvpRange=${bot.pvp?.attackRange}`
-    );
-  }
 
   const target = bot.pvp?.target;
   if (!target) {

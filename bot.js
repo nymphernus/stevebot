@@ -182,15 +182,6 @@ function bindEvents(bot) {
         : Math.max(config.combatRadius ?? 10, 24);
       // В руке лук во время боя — вернуть ближнее оружие до удара
       try { require('./src/ranged').enforceMeleeWeapon(); } catch (e) { /* не ломать tick */ }
-
-      // ДИАГНОСТИКА: временный лог, снимается после разбора бага с луком
-      const dbgT = bot.pvp?.target;
-      if (dbgT) {
-        logger.info(
-          `[⚔ DBG] autoAttack: pvpTarget=${dbgT.name} ` +
-          `dist=${bot.entity.position.distanceTo(dbgT.position).toFixed(1)}`
-        );
-      }
       autoAttack(r);
       checkWatchdog(tickCounter);
     }
