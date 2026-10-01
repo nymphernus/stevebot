@@ -168,9 +168,6 @@ function bindEvents(bot) {
     // Выживание: вода, лава, фиксация падений — в самом начале тика
     try { require('./src/survival').onTick(); } catch (e) { /* не ломать physicsTick */ }
 
-    // Дальний бой — до autoAttack, чтобы лук был приоритетом
-    try { require('./src/ranged').onTick(); } catch (e) { /* не ломать tick */ }
-
     if (tickCounter % 20 === 0) {
       try { require('./src/mining').onTick(); } catch (e) { /* не ломать tick */ }
       try { require('./src/building').onTick(); } catch (e) { /* не ломать tick */ }
@@ -180,8 +177,6 @@ function bindEvents(bot) {
       const r = isGuarding()
         ? Math.max(config.guardRadius ?? 8, 12) + 4
         : Math.max(config.combatRadius ?? 10, 24);
-      // В руке лук во время боя — вернуть ближнее оружие до удара
-      try { require('./src/ranged').enforceMeleeWeapon(); } catch (e) { /* не ломать tick */ }
       autoAttack(r);
       checkWatchdog(tickCounter);
     }

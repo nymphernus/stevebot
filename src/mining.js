@@ -251,6 +251,11 @@ function installDigWrapper() {
 
   const originalDig = bot.dig.bind(bot);
   bot.dig = async function (block, forceLook) {
+    // Защита кровати — не копаем никогда
+    if (block && block.name && block.name.endsWith('_bed')) {
+      return false;
+    }
+
     const hadWeapon = isWeaponItem(bot.heldItem);
 
     try {

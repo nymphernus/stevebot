@@ -130,7 +130,7 @@ async function executeCommand(source, playerName, rawMessage) {
     const survStatus = `Surv:${s.enabled ? 'ON' : 'OFF'}` +
       `${s.inWater ? ' WATER' : ''}${s.inLava ? ' LAVA' : ''}`;
     const toolName = bot.heldItem?.name || 'empty';
-    const bowLeft = require('./ranged').getStatus().arrowsLeft;
+    const meleeInfo = require('./ranged').getStatus();
     const home = require('./spawnpoint').get();
     const homeText = home.set
       ? `${home.pos.x},${home.pos.y},${home.pos.z}`
@@ -140,7 +140,7 @@ async function executeCommand(source, playerName, rawMessage) {
       `HP:${bot.health.toFixed(0)} Food:${bot.food} ` +
       `Pos:${pos.x.toFixed(0)},${pos.y.toFixed(0)},${pos.z.toFixed(0)} ` +
       `Guard:${guardStatus} Combat:${combatStatus} Target:${targetName} ${survStatus} ` +
-      `Tool:${toolName} Bow:${bowLeft} Home:${homeText} Loot:${loot.enabled ? 'ON' : 'OFF'}`
+      `Tool:${toolName} Melee:${meleeInfo.meleeWeapon || 'empty'} Home:${homeText} Loot:${loot.enabled ? 'ON' : 'OFF'}`
     );
   }
 
@@ -186,12 +186,9 @@ async function executeCommand(source, playerName, rawMessage) {
     return;
   }
 
-  // ---- ranged (статус дальнего боя) ----
+  // ---- ranged (лук удалён) ----
   if (cmd === 'ranged') {
-    const s = require('./ranged').getStatus();
-    sendReply(source,
-      `🏹 shooting=${s.shooting} arrows=${s.arrowsLeft} bow=${s.bowEquipped ? 'ON' : 'OFF'}`
-    );
+    sendReply(source, 'Лук больше не используется. Ближний бой: меч → топор → рука.');
     return;
   }
 
@@ -271,7 +268,6 @@ async function executeCommand(source, playerName, rawMessage) {
       '  clearpotions — очистить чёрный список зелий',
       '  stats — счётчики расходов (зелья/яблоки/еда)',
       '  survival [on|off|toggle] — управление выживанием',
-      '  ranged — статус дальнего боя',
       '  sethome / setspawn — установить дом (через кровать или координаты)',
       '  gohome — идти к дому',
       '  help — список команд',
