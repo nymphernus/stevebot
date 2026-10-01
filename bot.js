@@ -4,7 +4,6 @@ const { GoalFollow, GoalNear } = goals;
 const mcData = require('minecraft-data');
 
 // ---- Импорты плагинов (raw) ----
-const pvpRaw = require('mineflayer-pvp');
 const armorManagerRaw = require('mineflayer-armor-manager');
 const autoEatRaw = require('mineflayer-auto-eat');
 
@@ -78,7 +77,6 @@ function createBot() {
   });
 
   bot.loadPlugin(pathfinder); // чистый плагин
-  safeLoadPlugin(bot, pvpRaw, 'mineflayer-pvp');
   safeLoadPlugin(bot, armorManagerRaw, 'mineflayer-armor-manager');
   safeLoadPlugin(bot, autoEatRaw, 'mineflayer-auto-eat');
 
@@ -110,6 +108,22 @@ function createBot() {
   const safety = require('./src/safety');
   follow.setBot(bot);
   safety.setBot(bot);
+
+  // Устанавливаем базовые Movements один раз при спавне
+  // Это инфраструктурная настройка — не привязана к sethome/follow/guard
+  bot.once('spawn', () => {
+    try {
+      const defaultMovements = new Movements(bot);
+      defaultMovements.canDig = false;
+      defaultMovements.allow1by1towers = false;
+      defaultMovements.canOpenDoors = true;
+      defaultMovements.canSwim = true;
+      bot.pathfinder.setMovements(defaultMovements);
+      logger.info('[PATH] Movements установлены: canDig=false, allow1by1towers=false, canSwim=true');
+    } catch (e) {
+      logger.error(`[PATH] Не удалось установить Movements: ${e.message}`);
+    }
+  });
 
   bindEvents(bot);
 }
@@ -165,6 +179,11 @@ function bindEvents(bot) {
     if (!bot || !bot.entity) return;
     tickCounter++;
 
+    // Ближний бой через ranged.js (цель ставит combat.js)
+    if (tickCounter % 5 === 0) {
+      try { require('./src/ranged').onTick(tickCounter); } catch (e) { /* ignore */ }
+    }
+
     // Выживание: вода, лава, фиксация падений — в самом начале тика
     try { require('./src/survival').onTick(); } catch (e) { /* не ломать physicsTick */ }
 
@@ -182,14 +201,12 @@ function bindEvents(bot) {
     }
 
     if (tickCounter % 20 === 0) {
-      // Автоподбор дропа — после боя, когда pvp.target пуст
+      // Автоподбор дропа — после боя, когда цель не выбрана
       try { require('./src/looting').onTick(); } catch (e) { /* не ломать tick */ }
 
       const healing = require('./src/consumables').isHealing();
       const eating = bot.autoEat && bot.autoEat.isEating;
-      // Дальний бой держит лук в руке — экипировкой оружия его не перебиваем
-      const rangedBusy = require('./src/ranged').getStatus().shooting;
-      if (!healing && !eating && !rangedBusy && needsWeapon()) {
+      if (!healing && !eating && needsWeapon()) {
         equipBestWeapon().catch(() => {});
       }
       // autoHeal не чаще раза в 5 секунд: при HP ниже порога проверка идёт каждый
@@ -204,8 +221,8 @@ function bindEvents(bot) {
     if (tickCounter % 100 === 0 && config.debug) {
       const combatRadius = Math.max(config.combatRadius ?? 10, 24);
       const hostiles = countHostiles(combatRadius);
-      const pvpTarget = bot.pvp?.target?.name || 'null';
-      logger.info(`[DBG] tick=${tickCounter}, hostiles=${hostiles}, radius=${combatRadius}, pvp=${pvpTarget}`);
+      const combatTarget = require('./src/ranged').getTarget()?.name || 'null';
+      logger.info(`[DBG] tick=${tickCounter}, hostiles=${hostiles}, radius=${combatRadius}, target=${combatTarget}`);
     }
   });
 

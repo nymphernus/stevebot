@@ -42,13 +42,12 @@ function findHostileMob(range = HOSTILE_RANGE) {
  * Сторожевой таймер: если бой длится > 30 секунд и цель не двигается — сбрасываем.
  */
 function checkWatchdog(tickCounter) {
-  if (!bot || !bot.pvp || !bot.pvp.target) {
+  const target = require('./ranged').getTarget();
+  if (!bot || !target) {
     pvpStartTime = 0;
     lastTargetPos = null;
     return;
   }
-
-  const target = bot.pvp.target;
 
   // Начинаем отсчёт
   if (pvpStartTime === 0) {
@@ -68,7 +67,7 @@ function checkWatchdog(tickCounter) {
   // Если цель не двигается > 30 секунд — сбрасываем бой
   if (tickCounter - pvpStartTime > WATCHDOG_TIMEOUT) {
     logger.warn(`[⚔] Сторожевой таймер: бой длится >30с, цель не двигается. Сбрасываем.`);
-    bot.pvp.stop();
+    require('./ranged').clearTarget();
     pvpStartTime = 0;
     lastTargetPos = null;
   }
@@ -78,14 +77,15 @@ function checkWatchdog(tickCounter) {
  * Атаковать моба, если бот ещё не в бою.
  */
 function autoAttack(range = HOSTILE_RANGE) {
-  if (!bot || bot.pvp.target) return; // уже сражается
+  const ranged = require('./ranged');
+  if (!bot || ranged.getTarget()) return; // уже сражается
 
   const r = range ?? HOSTILE_RANGE;
   const mob = findHostileMob(r);
 
   if (!mob) return;
 
-  bot.pvp.attack(mob);
+  ranged.setTarget(mob);
   pvpStartTime = 0; // сбрасываем сторожевой таймер
   lastTargetPos = null;
   logger.info(`[⚔] Цель: ${mob.name || mob.displayName} @ ${mob.position.distanceTo(bot.entity.position).toFixed(1)}м`);
@@ -95,10 +95,7 @@ function autoAttack(range = HOSTILE_RANGE) {
  * Остановить бой.
  */
 function stopCombat() {
-  if (!bot || !bot.pvp) return;
-  bot.pvp.stop();
-  pvpStartTime = 0;
-  lastTargetPos = null;
+  try { require('./ranged').clearTarget(); } catch {}
   logger.info('[⚔] Бой остановлен');
 }
 
@@ -107,7 +104,8 @@ function stopCombat() {
  */
 function attackEntity(entity) {
   if (!bot || !entity || !entity.isValid) return false;
-  bot.pvp.attack(entity);
+  const ranged = require('./ranged');
+  ranged.setTarget(entity);
   pvpStartTime = 0;
   lastTargetPos = null;
   return true;

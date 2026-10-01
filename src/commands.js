@@ -83,7 +83,7 @@ async function executeCommand(source, playerName, rawMessage) {
 
   // ---- attack ----
   if (cmd === 'attack') {
-    if (bot.pvp.target) {
+    if (require('./ranged').getTarget()) {
       sendReply(source, 'Уже в бою');
       return;
     }
@@ -125,12 +125,13 @@ async function executeCommand(source, playerName, rawMessage) {
       ? `ON(r=${guardInfo.radius})`
       : 'OFF';
     const combatStatus = combatEnabled ? 'ON' : 'OFF';
-    const targetName = bot.pvp?.target?.name || 'null';
+    const targetName = require('./ranged').getTarget()?.name || 'null';
     const s = require('./survival').getStatus();
     const survStatus = `Surv:${s.enabled ? 'ON' : 'OFF'}` +
       `${s.inWater ? ' WATER' : ''}${s.inLava ? ' LAVA' : ''}`;
     const toolName = bot.heldItem?.name || 'empty';
-    const meleeInfo = require('./ranged').getStatus();
+    const meleeWeapon = bot.inventory?.items().find(i =>
+      i.name.endsWith('_sword') || i.name.endsWith('_axe'))?.name || null;
     const home = require('./spawnpoint').get();
     const homeText = home.set
       ? `${home.pos.x},${home.pos.y},${home.pos.z}`
@@ -140,7 +141,7 @@ async function executeCommand(source, playerName, rawMessage) {
       `HP:${bot.health.toFixed(0)} Food:${bot.food} ` +
       `Pos:${pos.x.toFixed(0)},${pos.y.toFixed(0)},${pos.z.toFixed(0)} ` +
       `Guard:${guardStatus} Combat:${combatStatus} Target:${targetName} ${survStatus} ` +
-      `Tool:${toolName} Melee:${meleeInfo.meleeWeapon || 'empty'} Home:${homeText} Loot:${loot.enabled ? 'ON' : 'OFF'}`
+      `Tool:${toolName} Melee:${meleeWeapon || 'empty'} Home:${homeText} Loot:${loot.enabled ? 'ON' : 'OFF'}`
     );
   }
 

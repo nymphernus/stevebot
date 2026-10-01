@@ -1,5 +1,5 @@
 const logger = require('./logger');
-const { goals, Movements } = require('mineflayer-pathfinder');
+const { goals } = require('mineflayer-pathfinder');
 const { GoalBlock } = goals;
 
 let bot = null;
@@ -39,11 +39,6 @@ async function setHome() {
     const dist = bot.entity.position.distanceTo(bedBlock.position);
     logger.info(`[🏠] Найдена кровать на ${dist.toFixed(1)}м, иду к ней`);
     try {
-      const mv = new Movements(bot);
-      mv.canDig = false;
-      mv.allow1by1towers = false;
-      mv.canOpenDoors = true;
-      bot.pathfinder.setMovements(mv);
       await bot.pathfinder.goto(new GoalBlock(
         bedBlock.position.x, bedBlock.position.y, bedBlock.position.z
       ));
@@ -77,11 +72,6 @@ function goHome() {
     return false;
   }
   try {
-    const mv = new Movements(bot);
-    mv.canDig = false;
-    mv.allow1by1towers = false;
-    mv.canOpenDoors = true;
-    bot.pathfinder.setMovements(mv);
     bot.pathfinder.setGoal(new GoalBlock(spawnPoint.x, spawnPoint.y, spawnPoint.z));
     logger.info(`[🏠] Иду к дому (${fmt(spawnPoint)})`);
     return true;
