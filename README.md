@@ -443,4 +443,5 @@ git status
 - **Ротации логов по размеру нет.** За месяц работы в `logs/` накопится 30+ файлов; удалять вручную или добавить очистку в планировщик.
 - **Smoke-тест зависит от чистоты `logs/`.** Подробности и команда очистки — в разделе 9. Устранение требует изоляции лога теста (свой файл или отметка времени старта), а не обхода через `logs/`.
 - **`src/data.js` в проекте отсутствует** — состояния и реестры берутся из `bot.registry` и `minecraft-data` напрямую.
-- **Дроп предметов на 1.21.11 приходит как `type=other`, а не `type=object`.** Проверено через `!dumpitems`: `type=other name=item displayName=Item objectType=Item entityType=71`. Детект в `src/looting.js` поэтому смотрит на `objectType`/`name`, а не на `type`. Команда `!dumpitems` оставлена как диагностика при странном поведении автоподбора.
+- **Дроп предметов на 1.21.11 приходит как `type=other`, а не `type=object`.** Проверено через `!dumpitems`: `type=other name=item displayName=Item entityType=71`. Детект в `src/looting.js` смотрит на `name === 'item'` и `displayName`, а не на `type`. Команда `!dumpitems` оставлена как диагностика при странном поведении автоподбора.
+- **Поле `entity.objectType` в `prismarine-entity` deprecated** и печатает `console.trace` с полным стеком на каждое чтение. Детект дропа в `src/looting.js` это поле не читает — используются `name` и `displayName`.

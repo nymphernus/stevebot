@@ -217,11 +217,11 @@
         <h2>Статус</h2>
         <div class="status-grid">
           <div class="status-item">
-            <div class="status-label">HP</div>
+            <div class="status-label">Здоровье</div>
             <div id="statusHp" class="status-value">0</div>
           </div>
           <div class="status-item">
-            <div class="status-label">Food</div>
+            <div class="status-label">Еда</div>
             <div id="statusFood" class="status-value">0</div>
           </div>
           <div class="status-item">
@@ -229,24 +229,24 @@
             <div id="statusPos" class="status-value">0, 0, 0</div>
           </div>
           <div class="status-item">
-            <div class="status-label">Guard</div>
-            <div id="statusGuard" class="status-value off">OFF</div>
+            <div class="status-label">Охрана</div>
+            <div id="statusGuard" class="status-value off">ВЫКЛ</div>
           </div>
           <div class="status-item">
-            <div class="status-label">Combat</div>
-            <div id="statusCombat" class="status-value on">ON</div>
+            <div class="status-label">Бой</div>
+            <div id="statusCombat" class="status-value on">ВКЛ</div>
           </div>
           <div class="status-item">
-            <div class="status-label">Target</div>
-            <div id="statusTarget" class="status-value">null</div>
+            <div class="status-label">Цель</div>
+            <div id="statusTarget" class="status-value">нет</div>
           </div>
           <div class="status-item">
-            <div class="status-label">Home</div>
-            <div id="statusHome" class="status-value">none</div>
+            <div class="status-label">Точка спавна</div>
+            <div id="statusHome" class="status-value">не задана</div>
           </div>
           <div class="status-item">
-            <div class="status-label">Loot</div>
-            <div id="statusLoot" class="status-value off">OFF</div>
+            <div class="status-label">Подбор лута</div>
+            <div id="statusLoot" class="status-value off">ВЫКЛ</div>
           </div>
         </div>
       </div>
@@ -254,22 +254,22 @@
       <div class="panel">
         <h2>Управление</h2>
         <div class="controls">
-          <button onclick="sendCommand('guard')">Guard</button>
-          <button onclick="sendCommand('unguard')">Unguard</button>
-          <button onclick="sendCommand('stop')">Stop</button>
-          <button onclick="sendCommand('attack')">Attack</button>
-          <button onclick="sendCommand('peace')">Peace</button>
-          <button onclick="sendCommand('status')">Status</button>
+          <button onclick="sendCommand('guard')">Охрана</button>
+          <button onclick="sendCommand('unguard')">Снять охрану</button>
+          <button onclick="sendCommand('stop')">Стоп</button>
+          <button onclick="sendCommand('attack')">Атака</button>
+          <button onclick="sendCommand('peace')">Мир</button>
+          <button onclick="sendCommand('status')">Статус</button>
         </div>
         <div class="controls-grid">
-          <button onclick="sendCommand('setspawn')">SetSpawn</button>
-          <button onclick="sendCommand('gohome')">GoHome</button>
-          <button onclick="sendCommand('ranged')">Ranged</button>
-          <button onclick="sendCommand('survival')">Survival</button>
-          <button onclick="sendCommand('survival off')">SurvOff</button>
-          <button onclick="sendCommand('survival on')">SurvOn</button>
-          <button onclick="sendCommand('clearpotions')">ClearPotions</button>
-          <button onclick="sendCommand('dumpitems')">DumpItems</button>
+          <button onclick="sendCommand('setspawn')">Точка спавна</button>
+          <button onclick="sendCommand('gohome')">Домой</button>
+          <button onclick="sendCommand('ranged')">Лук</button>
+          <button onclick="sendCommand('survival')">Выживание</button>
+          <button onclick="sendCommand('survival off')">Выживание: выкл</button>
+          <button onclick="sendCommand('survival on')">Выживание: вкл</button>
+          <button onclick="sendCommand('clearpotions')">Очистить зелья</button>
+          <button onclick="sendCommand('dumpitems')">Список лута</button>
         </div>
         <div class="input-group">
           <input type="text" id="commandInput" placeholder="Введите команду..." onkeypress="handleKeyPress(event)">
@@ -359,20 +359,25 @@
       document.getElementById('statusFood').textContent = data.food;
       document.getElementById('statusPos').textContent = `${data.pos.x}, ${data.pos.y}, ${data.pos.z}`;
 
+      // Сервер присылает 'ON'/'OFF' и 'ON(r=8)' — в DOM показываем по-русски,
+      // а CSS-класс определяем по исходной строке
+      const guardOn = String(data.guard).startsWith('ON');
       const guardEl = document.getElementById('statusGuard');
-      guardEl.textContent = data.guard;
-      guardEl.className = 'status-value ' + (data.guard.startsWith('ON') ? 'on' : 'off');
+      guardEl.textContent = guardOn ? data.guard.replace('ON', 'ВКЛ') : 'ВЫКЛ';
+      guardEl.className = 'status-value ' + (guardOn ? 'on' : 'off');
 
+      const combatOn = data.combat === 'ON';
       const combatEl = document.getElementById('statusCombat');
-      combatEl.textContent = data.combat;
-      combatEl.className = 'status-value ' + (data.combat === 'ON' ? 'on' : 'off');
+      combatEl.textContent = combatOn ? 'ВКЛ' : 'ВЫКЛ';
+      combatEl.className = 'status-value ' + (combatOn ? 'on' : 'off');
 
-      document.getElementById('statusTarget').textContent = data.target;
-      document.getElementById('statusHome').textContent = data.home || 'none';
+      document.getElementById('statusTarget').textContent = data.target || 'нет';
+      document.getElementById('statusHome').textContent = data.home === 'none' ? 'не задана' : (data.home || 'не задана');
 
+      const lootOn = data.loot === 'ON';
       const lootEl = document.getElementById('statusLoot');
-      lootEl.textContent = data.loot || 'OFF';
-      lootEl.className = 'status-value ' + (data.loot === 'ON' ? 'on' : 'off');
+      lootEl.textContent = lootOn ? 'ВКЛ' : 'ВЫКЛ';
+      lootEl.className = 'status-value ' + (lootOn ? 'on' : 'off');
     }
 
     function updateConnectionStatus(connected) {

@@ -58,16 +58,21 @@ function displayName(item) {
  * Является ли сущность выпавшим предметом.
  *
  * Проверено на сервере 1.21.11 через !dumpitems:
- *   type=other name=item displayName=Item objectType=Item entityType=71
+ *   type=other name=item displayName=Item entityType=71
  * То есть type у дропа — 'other', а не 'object'. Жёсткая проверка
  * type === 'object' отсекала весь лот.
+ *
+ * Устаревшее поле типа сущности НЕ читаем: prismarine-entity печатает
+ * на него console.trace при каждом обращении — десятки строк в секунду.
  */
 function isItemEntity(e) {
   if (!e || !e.position) return false;
-  if (e.objectType === 'Item') return true;        // objectType строкой
-  if (e.name === 'item') return true;              // основное поле
+  // mineflayer 4.x: предмет — это entity с name === 'item'
+  if (e.name === 'item') return true;
+  // displayName — актуальное поле вместо устаревшего
+  if (typeof e.displayName === 'string' && e.displayName.toLowerCase() === 'item') return true;
+  // fallback по entityType
   if (e.entityType === 'item') return true;
-  if (e.objectType === 2) return true;             // objectType числом
   return false;
 }
 
@@ -171,7 +176,7 @@ function dumpNearbyItems() {
     const d = e.position.distanceTo(bot.entity.position);
     logger.info(
       `[🔍] entity: type=${e.type} name=${e.name} displayName=${e.displayName} ` +
-      `objectType=${e.objectType} entityType=${e.entityType} metadata=${JSON.stringify(e.metadata)} ` +
+      `entityType=${e.entityType} metadata=${JSON.stringify(e.metadata)} ` +
       `pos=${e.position.x.toFixed(1)},${e.position.y.toFixed(1)},${e.position.z.toFixed(1)} dist=${d.toFixed(1)}`
     );
   }
