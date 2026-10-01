@@ -1,0 +1,19 @@
+{
+  "host": "192.168.31.49",
+  "port": 25565,
+  "username": "haise",
+  "version": false,
+  "auth": "offline",
+  "reconnectDelay": 5000,
+  "maxReconnectAttempts": -1,
+  "followDistance": 3,
+  "prefix": "!",
+  "guardRadius": 8,
+  "combatRadius": 10,
+  "autoEatStartAt": 14,
+  "autoHealThreshold": 10,
+  "autoHealCriticalThreshold": 6,
+  "webPort": 3000,
+  "webToken": "",
+  "debug": false
+}

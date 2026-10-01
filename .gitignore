@@ -1,0 +1,15 @@
+node_modules/
+logs/
+*.log
+*.pid
+.env
+_tmp_*
+tests/smoke-bot.log
+bot_run.log
+bot_stdout.log
+bot_stderr.log
+log.txt
+err.txt
+run_out.txt
+run_err.txt
+.DS_Store
