@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minecraft Bot Control</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #00d4ff;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .panel {
+      background: #16213e;
+      border-radius: 8px;
+      padding: 15px;
+      border: 1px solid #0f3460;
+    }
+
+    .panel h2 {
+      margin-bottom: 10px;
+      color: #00d4ff;
+      font-size: 16px;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .status-item {
+      background: #0f3460;
+      padding: 10px;
+      border-radius: 4px;
+    }
+
+    .status-label {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+
+    .status-value {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .status-value.on {
+      color: #00ff88;
+    }
+
+    .status-value.off {
+      color: #ff4444;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    /* Новые команды: сетка, чтобы кнопки не растягивались на всю ширину */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .controls-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    button {
+      background: #0f3460;
+      color: #00d4ff;
+      border: 1px solid #00d4ff;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: #00d4ff;
+      color: #1a1a2e;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      background: #0f3460;
+      border: 1px solid #0f3460;
+      color: #eee;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #00d4ff;
+    }
+
+    .log-container {
+      height: 200px;
+      overflow-y: auto;
+      background: #0a0a1a;
+      border-radius: 4px;
+      padding: 10px;
+      font-family: 'Consolas', monospace;
+      font-size: 12px;
+    }
+
+    .log-entry {
+      margin-bottom: 4px;
+      padding: 2px 0;
+      border-bottom: 1px solid #1a1a2e;
+    }
+
+    .log-time {
+      color: #666;
+      margin-right: 8px;
+    }
+
+    .log-level-info {
+      color: #00d4ff;
+    }
+
+    .log-level-warn {
+      color: #ffaa00;
+    }
+
+    .log-level-error {
+      color: #ff4444;
+    }
+
+    .chat-user {
+      color: #00ff88;
+      font-weight: bold;
+    }
+
+    .chat-message {
+      color: #ccc;
+    }
+
+    .connection-status {
+      text-align: center;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .connection-status.connected {
+      background: #00ff8822;
+      color: #00ff88;
+    }
+
+    .connection-status.disconnected {
+      background: #ff444422;
+      color: #ff4444;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Minecraft Bot Control</h1>
+
+    <div id="connectionStatus" class="connection-status disconnected">
+      Отключено
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Статус</h2>
+        <div class="status-grid">
+          <div class="status-item">
+            <div class="status-label">HP</div>
+            <div id="statusHp" class="status-value">0</div>
+          </div>
+          <div class="status-item">
+            <div class="status-label">Food</div>
+            <div id="statusFood" class="status-value">0</div>
+          </div>
+          <div class="status-item">
+            <div class="status-label">Позиция</div>
+            <div id="statusPos" class="status-value">0, 0, 0</div>
+          </div>
+          <div class="status-item">
+            <div class="status-label">Guard</div>
+            <div id="statusGuard" class="status-value off">OFF</div>
+          </div>
+          <div class="status-item">
+            <div class="status-label">Combat</div>
+            <div id="statusCombat" class="status-value on">ON</div>
+          </div>
+          <div class="status-item">
+            <div class="status-label">Target</div>
+            <div id="statusTarget" class="status-value">null</div>
+          </div>
+          <div class="status-item">
+            <div class="status-label">Home</div>
+            <div id="statusHome" class="status-value">none</div>
+          </div>
+          <div class="status-item">
+            <div class="status-label">Loot</div>
+            <div id="statusLoot" class="status-value off">OFF</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Управление</h2>
+        <div class="controls">
+          <button onclick="sendCommand('guard')">Guard</button>
+          <button onclick="sendCommand('unguard')">Unguard</button>
+          <button onclick="sendCommand('stop')">Stop</button>
+          <button onclick="sendCommand('attack')">Attack</button>
+          <button onclick="sendCommand('peace')">Peace</button>
+          <button onclick="sendCommand('status')">Status</button>
+        </div>
+        <div class="controls-grid">
+          <button onclick="sendCommand('setspawn')">SetSpawn</button>
+          <button onclick="sendCommand('gohome')">GoHome</button>
+          <button onclick="sendCommand('ranged')">Ranged</button>
+          <button onclick="sendCommand('survival')">Survival</button>
+          <button onclick="sendCommand('survival off')">SurvOff</button>
+          <button onclick="sendCommand('survival on')">SurvOn</button>
+          <button onclick="sendCommand('clearpotions')">ClearPotions</button>
+          <button onclick="sendCommand('dumpitems')">DumpItems</button>
+        </div>
+        <div class="input-group">
+          <input type="text" id="commandInput" placeholder="Введите команду..." onkeypress="handleKeyPress(event)">
+          <button onclick="sendCommandFromInput()">Отправить</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Игровой чат</h2>
+        <div id="chatLog" class="log-container"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Логи бота</h2>
+        <div id="botLog" class="log-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let ws = null;
+    let reconnectInterval = null;
+    const maxLogEntries = 100;
+
+    function connect() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const token = new URLSearchParams(window.location.search).get('token') || '';
+      const wsUrl = `${protocol}//${window.location.host}${token ? '?token=' + token : ''}`;
+
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        console.log('WebSocket connected');
+        updateConnectionStatus(true);
+        if (reconnectInterval) {
+          clearInterval(reconnectInterval);
+          reconnectInterval = null;
+        }
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          handleMessage(msg);
+        } catch (e) {
+          console.error('Failed to parse message:', e);
+        }
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket disconnected');
+        updateConnectionStatus(false);
+        scheduleReconnect();
+      };
+
+      ws.onerror = (e) => {
+        console.error('WebSocket error:', e);
+      };
+    }
+
+    function scheduleReconnect() {
+      if (reconnectInterval) return;
+      reconnectInterval = setInterval(() => {
+        console.log('Attempting to reconnect...');
+        connect();
+      }, 2000);
+    }
+
+    function handleMessage(msg) {
+      switch (msg.type) {
+        case 'status':
+          updateStatus(msg.data);
+          break;
+        case 'chat':
+          addChatMessage(msg.data.user, msg.data.message);
+          break;
+        case 'log':
+          addBotLog(msg.data.level, msg.data.message);
+          break;
+      }
+    }
+
+    function updateStatus(data) {
+      document.getElementById('statusHp').textContent = data.hp;
+      document.getElementById('statusFood').textContent = data.food;
+      document.getElementById('statusPos').textContent = `${data.pos.x}, ${data.pos.y}, ${data.pos.z}`;
+
+      const guardEl = document.getElementById('statusGuard');
+      guardEl.textContent = data.guard;
+      guardEl.className = 'status-value ' + (data.guard.startsWith('ON') ? 'on' : 'off');
+
+      const combatEl = document.getElementById('statusCombat');
+      combatEl.textContent = data.combat;
+      combatEl.className = 'status-value ' + (data.combat === 'ON' ? 'on' : 'off');
+
+      document.getElementById('statusTarget').textContent = data.target;
+      document.getElementById('statusHome').textContent = data.home || 'none';
+
+      const lootEl = document.getElementById('statusLoot');
+      lootEl.textContent = data.loot || 'OFF';
+      lootEl.className = 'status-value ' + (data.loot === 'ON' ? 'on' : 'off');
+    }
+
+    function updateConnectionStatus(connected) {
+      const el = document.getElementById('connectionStatus');
+      if (connected) {
+        el.textContent = 'Подключено';
+        el.className = 'connection-status connected';
+      } else {
+        el.textContent = 'Отключено';
+        el.className = 'connection-status disconnected';
+      }
+    }
+
+    function sendCommand(cmd) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'command', text: cmd }));
+      }
+    }
+
+    function sendCommandFromInput() {
+      const input = document.getElementById('commandInput');
+      const cmd = input.value.trim();
+      if (cmd) {
+        sendCommand(cmd);
+        input.value = '';
+      }
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendCommandFromInput();
+      }
+    }
+
+    function addChatMessage(user, message) {
+      const container = document.getElementById('chatLog');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+
+      const time = new Date().toLocaleTimeString();
+      entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="chat-user">${user}:</span> <span class="chat-message">${message}</span>`;
+
+      container.appendChild(entry);
+      trimLogEntries(container);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function addBotLog(level, message) {
+      const container = document.getElementById('botLog');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+
+      const time = new Date().toLocaleTimeString();
+      entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-level-${level}">${message}</span>`;
+
+      container.appendChild(entry);
+      trimLogEntries(container);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function trimLogEntries(container) {
+      while (container.children.length > maxLogEntries) {
+        container.removeChild(container.firstChild);
+      }
+    }
+
+    // Запуск
+    connect();
+  </script>
+</body>
+</html>
