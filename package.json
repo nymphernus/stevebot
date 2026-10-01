@@ -18,7 +18,6 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@nxg-org/mineflayer-auto-buff": "^1.5.0",
     "minecraft-data": "^3.0.0",
     "mineflayer": "^4.39.0",
     "mineflayer-armor-manager": "^2.0.1",
