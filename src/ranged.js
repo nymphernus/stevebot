@@ -80,8 +80,8 @@ async function onTick(tickCounter) {
       } catch (e) {
         logger.error(`[⚔] setGoal ошибка: ${e.message}`);
       }
-      // Раз в секунду — расстояние, чтобы видеть, сходится ли бот
-      if (Date.now() - lastLogAt > 1000) {
+      // Раз в 5 сек — расстояние, чтобы видеть, сходится ли бот
+      if (Date.now() - lastLogAt > 5000) {
         lastLogAt = Date.now();
         logger.info(`[⚔] Погоня: ${currentTarget.name} @ ${dist.toFixed(1)}м`);
       }

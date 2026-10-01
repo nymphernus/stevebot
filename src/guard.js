@@ -31,8 +31,8 @@ function startGuard(radius = 8) {
   guardInterval = setInterval(() => {
     if (!guardActive || !guardPosition || !bot) return;
 
-    // Не трогаем, если бот в бою — mineflayer-pvp сам управляет движением
-    if (bot.pvp?.target) return;
+    // Не трогаем, если бот в бою — ranged сам управляет движением
+    if (require('./ranged').getTarget()) return;
 
     const dist = bot.entity.position.distanceTo(guardPosition);
     if (dist > 1.5) {

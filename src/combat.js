@@ -88,7 +88,8 @@ function autoAttack(range = HOSTILE_RANGE) {
   ranged.setTarget(mob);
   pvpStartTime = 0; // сбрасываем сторожевой таймер
   lastTargetPos = null;
-  logger.info(`[⚔] Цель: ${mob.name || mob.displayName} @ ${mob.position.distanceTo(bot.entity.position).toFixed(1)}м`);
+  // Лог цели печатает ranged.setTarget — здесь только отладка
+  logger.debug(`[⚔] autoAttack: ${mob.name || mob.displayName} @ ${mob.position.distanceTo(bot.entity.position).toFixed(1)}м`);
 }
 
 /**

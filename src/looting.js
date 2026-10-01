@@ -101,7 +101,7 @@ function nearbyItems() {
  */
 async function onTick() {
   if (!enabled || !bot || !bot.entity || !bot.pathfinder) return;
-  if (bot.pvp?.target) return;
+  if (require('./ranged').getTarget()) return;
   if (following) return;   // во время следования за игроком цель не перебиваем
 
   const list = nearbyItems();
