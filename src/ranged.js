@@ -7,7 +7,7 @@ let lastAttackAt = 0;
 let lastLogAt = 0;
 
 const ATTACK_COOLDOWN_MS = 600;
-const CHASE_DISTANCE = 2.5;
+const CHASE_DISTANCE = 3.0;
 const LOSE_DISTANCE = 32;
 
 function setBot(instance) {
