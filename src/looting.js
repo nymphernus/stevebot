@@ -37,15 +37,16 @@ function displayName(item) {
     }
   } catch (e) { /* нет метода — идём к metadata */ }
 
-  // Запасной путь: в minecraft-data items индексирован по имени,
-  // по числовому id нужно смотреть в itemsById
+  // Запасной путь: metadata[9].itemId. В minecraft-data объект items
+  // индексирован ЧИСЛОВЫМ id (проверено: items[1114] = 'rotten_flesh'),
+  // itemsById в этой версии отсутствует.
   const meta = item.metadata;
   if (Array.isArray(meta) && meta[9] && typeof meta[9] === 'object') {
     const id = meta[9].itemId;
     if (id != null) {
       try {
         const data = require('minecraft-data')(bot.version);
-        const found = (data.itemsById && data.itemsById[id]) || null;
+        const found = (data.items && data.items[id]) || (data.itemsById && data.itemsById[id]) || null;
         if (found && found.name) return found.name;
       } catch (e) { /* реестр может отсутствовать — не критично */ }
     }
