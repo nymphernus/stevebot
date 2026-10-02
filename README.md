@@ -44,7 +44,7 @@ Headless-бот для Minecraft Java Edition на Node.js + Mineflayer: чат-
 
 - Node.js ≥ 18
 - Minecraft-сервер Java Edition, проверялось на 1.21.11 в offline-mode
-- Windows, Linux или macOS
+- Windows, Linux
 
 ## Установка
 
@@ -96,9 +96,9 @@ npm install
 
 ```json
 {
-  "host": "192.168.31.49",
+  "host": "localhost",
   "port": 25565,
-  "username": "my_bot",
+  "username": "steve",
   "version": false,
   "auth": "offline",
   "reconnectDelay": 5000,
