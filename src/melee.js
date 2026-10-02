@@ -1,3 +1,4 @@
+// Ближний бой: поиск цели, погоня, атака. Лук не используется.
 const logger = require('./logger');
 const { goals } = require('mineflayer-pathfinder');
 
@@ -13,7 +14,7 @@ const LOSE_DISTANCE = 32;
 function setBot(instance) {
   bot = instance;
   if (!bot) return;
-  logger.info('[⚔] ranged: собственная логика боя активна');
+  logger.info('[⚔] melee: собственная логика боя активна');
 }
 
 function setTarget(entity) {

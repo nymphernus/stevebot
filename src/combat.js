@@ -42,7 +42,7 @@ function findHostileMob(range = HOSTILE_RANGE) {
  * Сторожевой таймер: если бой длится > 30 секунд и цель не двигается — сбрасываем.
  */
 function checkWatchdog(tickCounter) {
-  const target = require('./ranged').getTarget();
+  const target = require('./melee').getTarget();
   if (!bot || !target) {
     pvpStartTime = 0;
     lastTargetPos = null;
@@ -67,7 +67,7 @@ function checkWatchdog(tickCounter) {
   // Если цель не двигается > 30 секунд — сбрасываем бой
   if (tickCounter - pvpStartTime > WATCHDOG_TIMEOUT) {
     logger.warn(`[⚔] Сторожевой таймер: бой длится >30с, цель не двигается. Сбрасываем.`);
-    require('./ranged').clearTarget();
+    require('./melee').clearTarget();
     pvpStartTime = 0;
     lastTargetPos = null;
   }
@@ -77,18 +77,18 @@ function checkWatchdog(tickCounter) {
  * Атаковать моба, если бот ещё не в бою.
  */
 function autoAttack(range = HOSTILE_RANGE) {
-  const ranged = require('./ranged');
-  if (!bot || ranged.getTarget()) return; // уже сражается
+  const melee = require('./melee');
+  if (!bot || melee.getTarget()) return; // уже сражается
 
   const r = range ?? HOSTILE_RANGE;
   const mob = findHostileMob(r);
 
   if (!mob) return;
 
-  ranged.setTarget(mob);
+  melee.setTarget(mob);
   pvpStartTime = 0; // сбрасываем сторожевой таймер
   lastTargetPos = null;
-  // Лог цели печатает ranged.setTarget — здесь только отладка
+  // Лог цели печатает melee.setTarget — здесь только отладка
   logger.debug(`[⚔] autoAttack: ${mob.name || mob.displayName} @ ${mob.position.distanceTo(bot.entity.position).toFixed(1)}м`);
 }
 
@@ -96,7 +96,7 @@ function autoAttack(range = HOSTILE_RANGE) {
  * Остановить бой.
  */
 function stopCombat() {
-  try { require('./ranged').clearTarget(); } catch {}
+  try { require('./melee').clearTarget(); } catch {}
   logger.info('[⚔] Бой остановлен');
 }
 
@@ -105,8 +105,8 @@ function stopCombat() {
  */
 function attackEntity(entity) {
   if (!bot || !entity || !entity.isValid) return false;
-  const ranged = require('./ranged');
-  ranged.setTarget(entity);
+  const melee = require('./melee');
+  melee.setTarget(entity);
   pvpStartTime = 0;
   lastTargetPos = null;
   return true;

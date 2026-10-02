@@ -1,7 +1,7 @@
 {
-  "name": "minecraft-ai-bot",
+  "name": "stevebot",
   "version": "1.0.0",
-  "description": "Headless-бот для Minecraft Java Edition на Node.js + Mineflayer",
+  "description": "Headless Minecraft bot with CLI and Web GUI",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js",

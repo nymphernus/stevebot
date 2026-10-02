@@ -173,7 +173,7 @@ function broadcastStatus() {
     } : { x: 0, y: 0, z: 0 },
     guard: guardInfo.active ? `ON(r=${guardInfo.radius})` : 'OFF',
     combat: context.getCombatEnabled ? (context.getCombatEnabled() ? 'ON' : 'OFF') : 'OFF',
-    target: (() => { try { const t = require('./ranged').getTarget(); return t ? t.name : null; } catch { return null; } })(),
+    target: (() => { try { const t = require('./melee').getTarget(); return t ? t.name : null; } catch { return null; } })(),
     home: (() => {
       try {
         const s = require('./spawnpoint').get();

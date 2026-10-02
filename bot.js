@@ -90,10 +90,10 @@ function createBot() {
   const survival = require('./src/survival');
   survival.setBot(bot);
 
-  // Связываем инструменты, строительство, дальний бой, лут и спавн-точку
+  // Связываем инструменты, строительство, ближний бой, лут и спавн-точку
   require('./src/mining').setBot(bot);
   require('./src/building').setBot(bot);
-  require('./src/ranged').setBot(bot);
+  require('./src/melee').setBot(bot);
   require('./src/looting').setBot(bot);
   require('./src/spawnpoint').setBot(bot);
 
@@ -179,9 +179,9 @@ function bindEvents(bot) {
     if (!bot || !bot.entity) return;
     tickCounter++;
 
-    // Ближний бой через ranged.js (цель ставит combat.js)
+    // Ближний бой через melee.js (цель ставит combat.js)
     if (tickCounter % 5 === 0) {
-      try { require('./src/ranged').onTick(tickCounter); } catch (e) { /* ignore */ }
+      try { require('./src/melee').onTick(tickCounter); } catch (e) { /* ignore */ }
     }
 
     // Выживание: вода, лава, фиксация падений — в самом начале тика
@@ -221,7 +221,7 @@ function bindEvents(bot) {
     if (tickCounter % 100 === 0 && config.debug) {
       const combatRadius = Math.max(config.combatRadius ?? 10, 24);
       const hostiles = countHostiles(combatRadius);
-      const combatTarget = require('./src/ranged').getTarget()?.name || 'null';
+      const combatTarget = require('./src/melee').getTarget()?.name || 'null';
       logger.info(`[DBG] tick=${tickCounter}, hostiles=${hostiles}, radius=${combatRadius}, target=${combatTarget}`);
     }
   });

@@ -83,7 +83,7 @@ async function executeCommand(source, playerName, rawMessage) {
 
   // ---- attack ----
   if (cmd === 'attack') {
-    if (require('./ranged').getTarget()) {
+    if (require('./melee').getTarget()) {
       sendReply(source, 'Уже в бою');
       return;
     }
@@ -125,7 +125,7 @@ async function executeCommand(source, playerName, rawMessage) {
       ? `ON(r=${guardInfo.radius})`
       : 'OFF';
     const combatStatus = combatEnabled ? 'ON' : 'OFF';
-    const targetName = require('./ranged').getTarget()?.name || 'null';
+    const targetName = require('./melee').getTarget()?.name || 'null';
     const s = require('./survival').getStatus();
     const survStatus = `Surv:${s.enabled ? 'ON' : 'OFF'}` +
       `${s.inWater ? ' WATER' : ''}${s.inLava ? ' LAVA' : ''}`;
@@ -184,12 +184,6 @@ async function executeCommand(source, playerName, rawMessage) {
     }
     const ok = sp.goTo();
     sendReply(source, ok ? 'Иду к дому' : 'Не удалось поставить цель');
-    return;
-  }
-
-  // ---- ranged (лук удалён) ----
-  if (cmd === 'ranged') {
-    sendReply(source, 'Лук больше не используется. Ближний бой: меч → топор → рука.');
     return;
   }
 

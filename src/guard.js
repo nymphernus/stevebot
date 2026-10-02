@@ -31,8 +31,8 @@ function startGuard(radius = 8) {
   guardInterval = setInterval(() => {
     if (!guardActive || !guardPosition || !bot) return;
 
-    // Не трогаем, если бот в бою — ranged сам управляет движением
-    if (require('./ranged').getTarget()) return;
+    // Не трогаем, если бот в бою — melee сам управляет движением
+    if (require('./melee').getTarget()) return;
 
     const dist = bot.entity.position.distanceTo(guardPosition);
     if (dist > 1.5) {

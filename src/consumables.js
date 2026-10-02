@@ -279,7 +279,7 @@ async function consumeItem(item, label) {
 async function autoHeal() {
   if (!bot || !bot.entity) return;
   if (healingInProgress) return;
-  if (require('./ranged').getTarget()) return;
+  if (require('./melee').getTarget()) return;
   if (bot.health <= 0) return;
   if (bot.autoEat && bot.autoEat.isEating) return;
 
